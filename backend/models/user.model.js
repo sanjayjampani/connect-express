@@ -22,6 +22,13 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  bookmarks: {
+    type: [{
+      key: String,
+      route: mongoose.Schema.Types.Mixed
+    }],
+    default: []
   }
 });
 

@@ -2,7 +2,9 @@
 
 Find a direct train, or one change of train, between stations in Tamil Nadu, Karnataka, and Andhra Pradesh.
 
-Trains are a fixed timetable generated from `backend/data/index.js` and stored in MongoDB. Connecting routes are plain JavaScript. Register and login issue a JWT. The travel date is not a search input: the timetable has no calendar dates, only a day offset on each stop.
+Stations are the 58 listed in `backend/data/index.js`. Trains in `backend/data/trains.json` come from the Indian Railways timetable dated 30 August 2026 (NTES, GTFS version 2026-08-30-02-22-43, published at https://github.com/Neo2308/indianrailways-gtfs). A train is included only when that file still schedules it on or after 2 November 2026 and it stops at two or more of these stations. Stops outside the list are omitted. Connecting routes are plain JavaScript. Register and login issue a JWT. Search still has no calendar date, so a train that runs only on some days is shown on every search.
+
+A sentence such as "Tirupati Main to Chirala after 6pm" is split on "to". An optional "after" sets the earliest departure. Each side is matched to a station name on the list. "Chennai" alone is rejected because two stations share that word. The timetable search then runs as usual.
 
 `backend/.env` needs `MONGO_URI` and `JWT_SECRET`. Copy `.env.example` if you do not have one.
 

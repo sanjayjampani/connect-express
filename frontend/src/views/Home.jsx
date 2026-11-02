@@ -2,20 +2,30 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import './Home.css'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api'
+
 function Home() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [counts, setCounts] = useState({ stations: '', trains: '' })
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       setUser(JSON.parse(savedUser))
     }
+    fetch(`${API_URL}/stations`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) setCounts({ stations: data.count, trains: data.trainCount })
+      })
+      .catch(() => {})
   }, [])
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('connectExpress_recentSearches')
     setUser(null)
   }
 
@@ -35,11 +45,11 @@ function Home() {
       </video>
 
       <div className="home-header">
-        <div className="home-logo">🚄 Connect Express</div>
+        <div className="home-logo"><span className="train-slot"><span className="train">🚄</span></span> Connect Express</div>
         <div className="auth-buttons">
           {user ? (
             <>
-              <span className="user-greeting">👋 Hi, {user.name}</span>
+              <span className="user-greeting"><span className="wave">👋</span> Hi, {user.name}</span>
               <button className="auth-link logout" onClick={handleLogout}>Logout</button>
             </>
           ) : (
@@ -53,51 +63,36 @@ function Home() {
 
       <div className="network-status-bar">
         <div className="status-item">
-          <span className="status-dot pulse-green"></span>
-          <span className="status-label">SYS_READY</span>
+          <span className="status-value">{counts.stations}</span>
+          <span className="status-label">STATIONS</span>
         </div>
         <div className="status-item">
-          <span className="status-value">58</span>
-          <span className="status-label">STATIONS_ACTIVE</span>
-        </div>
-        <div className="status-item">
-          <span className="status-value">159</span>
+          <span className="status-value">{counts.trains}</span>
           <span className="status-label">TRAINS</span>
-        </div>
-        <div className="status-item mobile-hide">
-          <span className="status-label">AUTH_STABLE</span>
         </div>
       </div>
 
       <div className="home-content">
-        <div className="hero-badge">Next-Gen Railway Routing</div>
+        <div className="hero-badge">Direct or one change</div>
         <h1 className="hero-title">
           Connect <span className="highlight">Express</span>
         </h1>
         <p className="hero-subtitle">
-          High-performance neural routing engine. Optimized for real-time link analysis and multi-modal journey synthesis across the entire network.
+          Find a direct train, or one change of train, between stations in Tamil Nadu, Karnataka, and Andhra Pradesh.
         </p>
 
         <div className="cta-group">
           <button
             className="cta-primary"
-            onClick={() => user ? navigate('/search') : navigate('/login')}
+            onClick={() => navigate('/search')}
           >
-            {user ? 'INITIALIZE RESEARCH_' : 'SIGN IN TO START'}
+            Search
           </button>
-          {!user && (
-            <button
-              className="cta-secondary"
-              onClick={() => navigate('/signup')}
-            >
-              CREATE ACCOUNT
-            </button>
-          )}
 
           <div className="live-stats">
             <div className="stat-pill">
-              <span className="stat-label">ROUTES</span>
-              <span className="stat-count">53</span>
+              <span className="stat-label">AS OF</span>
+              <span className="stat-count">Aug 2026</span>
             </div>
             <div className="stat-pill">
               <span className="stat-label">MIN_LAYOVER</span>
@@ -115,22 +110,22 @@ function Home() {
         <div className="feature-item">
           <div className="feature-icon-box">⚡</div>
           <div className="feature-text">
-            <h3>Neural Engine</h3>
-            <p className="mono-text">Real-time route optimization using advanced A* heuristics and parallel data processing.</p>
+            <h3>Direct</h3>
+            <p className="mono-text">A train that stops at both stations, in that order.</p>
           </div>
         </div>
         <div className="feature-item">
           <div className="feature-icon-box">🔗</div>
           <div className="feature-text">
-            <h3>Smart Links</h3>
-            <p className="mono-text">Dynamic connection synthesis for complex, multi-station trajectories with zero overhead.</p>
+            <h3>One change</h3>
+            <p className="mono-text">Get off and board another train. The wait has to be between 1 and 12 hours.</p>
           </div>
         </div>
         <div className="feature-item">
           <div className="feature-icon-box">🏙️</div>
           <div className="feature-text">
-            <h3>Matrix Sync</h3>
-            <p className="mono-text">Seamless synchronization across all national nodes and regional transit layers.</p>
+            <h3>Sign in</h3>
+            <p className="mono-text">Email and password. Search works either way.</p>
           </div>
         </div>
       </div>

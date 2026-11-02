@@ -9,7 +9,8 @@ import Signup from './views/Signup'
 function App() {
   const location = useLocation()
   const isHomePage = location.pathname === '/'
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup'
+  const isAuthPage = ['/login', '/signup', '/signin', '/register'].includes(location.pathname)
+  const showBar = !isHomePage && !isAuthPage
 
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme')
@@ -20,18 +21,40 @@ function App() {
     document.documentElement.setAttribute('data-theme', saved)
     return saved
   })
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user')
+    if (!savedUser) {
+      setUser(null)
+      return
+    }
+    try {
+      setUser(JSON.parse(savedUser))
+    } catch {
+      setUser(null)
+    }
+  }, [location])
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark')
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('connectExpress_recentSearches')
+    setUser(null)
+    window.dispatchEvent(new Event('auth-change'))
+  }
+
   return (
-    <div className="app-root">
+    <div className={`app-root${isHomePage ? ' home' : ''}${showBar ? ' has-bar' : ''}`}>
       <button
         className="theme-toggle"
         onClick={toggleTheme}
@@ -39,6 +62,25 @@ function App() {
       >
         {theme === 'dark' ? '☀️' : '🌙'}
       </button>
+
+      {showBar && (
+        <header className="home-header">
+          <Link to="/" className="home-logo"><span className="train-slot"><span className="train">🚄</span></span> Connect Express</Link>
+          <div className="auth-buttons">
+            {user ? (
+              <>
+                <span className="user-greeting"><span className="wave">👋</span> Hi, {user.name}</span>
+                <button className="auth-link logout" onClick={handleLogout}>Logout</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="auth-link">Sign In</Link>
+                <Link to="/signup" className="auth-link primary">Sign Up</Link>
+              </>
+            )}
+          </div>
+        </header>
+      )}
 
       {!isHomePage && (
         <div className="bg-container">
@@ -50,18 +92,7 @@ function App() {
         </div>
       )}
 
-      <div className={isHomePage ? "" : "app"}>
-        {!isHomePage && !isAuthPage && (
-          <header className="header">
-            <Link to="/" className="logo-link">
-              <div className="logo small">
-                <span className="logo-icon">🚄</span>
-                <h1>Connect Express</h1>
-              </div>
-            </Link>
-          </header>
-        )}
-
+      <div className={isHomePage ? '' : `app${showBar ? ' with-bar' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />

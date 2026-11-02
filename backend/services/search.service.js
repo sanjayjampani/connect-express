@@ -43,16 +43,31 @@ function legResult(train, fromStop, toStop, duration) {
   };
 }
 
-// One change of train. A negative layover means the second train already left; do not add a day.
+// Stations strictly between from and to on a train that serves both.
+// Null when no train serves both, so a real change of line can stay.
+function stationsBetween(trains, fromCode, toCode) {
+  const between = new Set();
+  let onOneLine = false;
+  for (const train of trains) {
+    const a = train.stops.findIndex(s => s.stationCode === fromCode);
+    const b = train.stops.findIndex(s => s.stationCode === toCode);
+    if (a === -1 || b === -1 || a >= b) continue;
+    onOneLine = true;
+    for (let i = a + 1; i < b; i++) between.add(train.stops[i].stationCode);
+  }
+  return onOneLine ? between : null;
+}
+
 function findConnectingRoutes(trainsFromA, trainsToB, fromCode, toCode, minLayover = MIN_LAYOVER, maxLayover = MAX_LAYOVER) {
+  const between = stationsBetween(trainsFromA, fromCode, toCode);
   const byTransfer = new Map();
 
   for (const train of trainsFromA) {
     const fromIdx = train.stops.findIndex(s => s.stationCode === fromCode);
     if (fromIdx === -1) continue;
+    if (train.stops.slice(fromIdx + 1).some(s => s.stationCode === toCode)) continue;
     for (let k = fromIdx + 1; k < train.stops.length; k++) {
       const stop = train.stops[k];
-      if (stop.stationCode === toCode) continue;
       const arrivals = byTransfer.get(stop.stationCode) || [];
       arrivals.push({ train, fromStop: train.stops[fromIdx], arrivalStop: stop });
       byTransfer.set(stop.stationCode, arrivals);
@@ -68,11 +83,17 @@ function findConnectingRoutes(trainsFromA, trainsToB, fromCode, toCode, minLayov
     for (let k = 0; k < toIdx; k++) {
       const departureStop = train2.stops[k];
       if (departureStop.stationCode === fromCode) continue;
+      if (between && !between.has(departureStop.stationCode)) continue;
       const arrivals = byTransfer.get(departureStop.stationCode);
       if (!arrivals) continue;
 
       for (const leg1 of arrivals) {
         if (leg1.train.trainNumber === train2.trainNumber) continue;
+
+        const fromIdxOn1 = leg1.train.stops.indexOf(leg1.fromStop);
+        const transferIdx = leg1.train.stops.indexOf(leg1.arrivalStop);
+        const ridden = new Set(leg1.train.stops.slice(fromIdxOn1, transferIdx).map(s => s.stationCode));
+        if (train2.stops.slice(k + 1, toIdx).some(s => ridden.has(s.stationCode))) continue;
 
         const arrMins = timeToMinutes(leg1.arrivalStop.arrivalTime, leg1.arrivalStop.day);
         const depMins = timeToMinutes(departureStop.departureTime, departureStop.day);

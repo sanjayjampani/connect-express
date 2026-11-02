@@ -1,11 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-function SearchForm({ stations, onSearch, loading }) {
+function SearchForm({ stations, onSearch, onSentence, loading, picked, onSavedTrips, savedOpen }) {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [sentence, setSentence] = useState('')
+
+  useEffect(() => {
+    if (!picked) return
+    setFrom(picked.from)
+    setTo(picked.to)
+  }, [picked])
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    const text = sentence.trim()
+    if (text) {
+      onSentence(text)
+      return
+    }
     if (from && to && from !== to) {
       onSearch(from, to)
     }
@@ -17,8 +29,23 @@ function SearchForm({ stations, onSearch, loading }) {
     setTo(temp)
   }
 
+  const sentenceReady = sentence.trim().length > 0
+
   return (
     <form className="search-form" onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="sentence">Type a trip</label>
+        <div className="input-wrapper">
+          <span className="input-icon">✎</span>
+          <input
+            id="sentence"
+            value={sentence}
+            onChange={(e) => setSentence(e.target.value)}
+            placeholder="Tirupati Main to Chirala after 6pm"
+            maxLength={200}
+          />
+        </div>
+      </div>
       <div className="form-inputs">
         <div className="form-group">
           <label htmlFor="from">Origin Station</label>
@@ -27,8 +54,8 @@ function SearchForm({ stations, onSearch, loading }) {
             <select
               id="from"
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              required
+              onChange={(e) => { setFrom(e.target.value); setSentence('') }}
+              required={!sentenceReady}
             >
               <option value="">Select origin</option>
               {stations.map((station) => (
@@ -57,8 +84,8 @@ function SearchForm({ stations, onSearch, loading }) {
             <select
               id="to"
               value={to}
-              onChange={(e) => setTo(e.target.value)}
-              required
+              onChange={(e) => { setTo(e.target.value); setSentence('') }}
+              required={!sentenceReady}
             >
               <option value="">Select destination</option>
               {stations.map((station) => (
@@ -75,9 +102,16 @@ function SearchForm({ stations, onSearch, loading }) {
         <button
           type="submit"
           className="search-btn"
-          disabled={loading || !from || !to || from === to}
+          disabled={loading || (!sentenceReady && (!from || !to || from === to))}
         >
           {loading ? 'Calculating...' : '🚀 Search Routes'}
+        </button>
+        <button
+          type="button"
+          className={`saved-trips-btn${savedOpen ? ' open' : ''}`}
+          onClick={onSavedTrips}
+        >
+          Saved trips
         </button>
       </div>
     </form>

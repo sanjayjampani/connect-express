@@ -34,7 +34,7 @@ async function startServer() {
     }
 
     await mongoose.connect(mongoUri);
-    console.log('Connected to MongoDB Atlas');
+    console.log('Connected to MongoDB');
 
     const { stationCount, trainCount } = await seedDatabase();
 

@@ -169,11 +169,20 @@ body {
     gap: 3rem;
 }
 
+.app.with-bar {
+    padding-top: 6rem;
+}
+
 /* HEADER */
 .header {
     text-align: center;
     padding: 4rem 1rem 1rem;
     animation: fade-in 1s ease-out;
+}
+
+.logo-link {
+    text-decoration: none;
+    color: inherit;
 }
 
 .logo {
@@ -263,9 +272,9 @@ body {
 
 .form-inputs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    align-items: flex-end;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: 1.5rem;
+    align-items: end;
 }
 
 .form-group {
@@ -334,6 +343,8 @@ body {
 .search-actions {
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 1rem;
     padding-top: 1rem;
 }
 
@@ -367,6 +378,23 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
     box-shadow: none;
+}
+
+.saved-trips-btn {
+    padding: 1.25rem 2rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saved-trips-btn.open,
+.saved-trips-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 @keyframes slide-up {
@@ -431,15 +459,20 @@ body {
 }
 
 .sort-dropdown select {
-    padding: 0.5rem 1rem;
-    background: var(--bg-secondary);
+    appearance: none;
+    padding: 0.5rem 2.25rem 0.5rem 1rem;
+    background-color: var(--bg-secondary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%2394a3b8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 L6 6.5 L11 1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 0.7rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 0.9rem;
     font-family: inherit;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .sort-dropdown select:hover {
@@ -469,6 +502,11 @@ body {
     font-size: 0.9rem;
     color: var(--text-muted);
     font-weight: 500;
+}
+
+.no-saved {
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
 .clear-recent-btn {
@@ -523,7 +561,13 @@ body {
     border-radius: var(--radius-full);
     font-size: 0.9rem;
     font-weight: 500;
+    font-family: inherit;
     border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.summary-badge.off {
+    opacity: 0.4;
 }
 
 .summary-badge.direct {
@@ -654,6 +698,33 @@ body {
     background: var(--accent-success);
     color: white;
     border-color: var(--accent-success);
+}
+
+.why-block {
+    margin-top: 1rem;
+}
+
+.why-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.why-line {
+    margin: 0.75rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.copy-btn.saved {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
 }
 
 /* JOURNEY VISUALIZATION - Vertical Timeline */
@@ -868,6 +939,7 @@ body {
 
 /* ERROR STATE */
 .error-message {
+    margin-top: 1.5rem;
     background: rgba(239, 68, 68, 0.05);
     border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: var(--radius-lg);
@@ -908,6 +980,27 @@ body {
 }
 
 /* SECTION DIVIDER */
+.saved-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.saved-heading span {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+}
+
+.saved-rule {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.5rem 0 0.25rem;
+}
+
 .section-divider {
     display: flex;
     align-items: center;
@@ -1007,8 +1100,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: flex-end;
-    margin-bottom: 0.5rem;
+    justify-self: center;
+    align-self: end;
     flex-shrink: 0;
 }
 
@@ -1089,6 +1182,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: scale(1.1);
 }
 
+/* Home header row is shorter than this 50px control, so the fixed top sits low. */
+.home .theme-toggle,
+.has-bar .theme-toggle {
+    top: calc(1.25rem - 5px);
+}
+
 /* LIGHT MODE STYLES */
 [data-theme="light"] {
     --bg-primary: #f8fafc;
@@ -1104,6 +1203,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     --border-color: rgba(0, 0, 0, 0.1);
     --border-hover: rgba(0, 0, 0, 0.2);
     --ring-color: rgba(249, 115, 22, 0.2);
+}
+
+[data-theme="light"] .sort-dropdown select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23475569' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 L6 6.5 L11 1.5'/%3E%3C/svg%3E");
 }
 
 [data-theme="light"] .bg-aurora {
@@ -1191,19 +1294,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     text-align: center;
 }
 
-.form-group {
+.auth-form .form-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.form-group label {
+.auth-form .form-group label {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-secondary);
 }
 
-.form-group input {
+.auth-form .form-group input {
     padding: 0.875rem 1rem;
     background: var(--bg-glass-strong);
     border: 1px solid var(--border-color);
@@ -1214,13 +1317,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transition: all var(--transition-fast);
 }
 
-.form-group input:focus {
+.auth-form .form-group input:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px var(--ring-color);
 }
 
-.form-group input::placeholder {
+.auth-form .form-group input::placeholder {
     color: var(--text-muted);
 }
 
@@ -1276,78 +1379,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: rgba(255, 255, 255, 0.9);
 }
 
-[data-theme="light"] .form-group input {
+[data-theme="light"] .auth-form .form-group input {
     background: rgba(241, 245, 249, 0.8);
-}
-
-/* Social Login */
-.social-divider {
-    display: flex;
-    align-items: center;
-    margin: 1.5rem 0;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-}
-
-.social-divider::before,
-.social-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border-color);
-}
-
-.social-divider span {
-    padding: 0 1rem;
-}
-
-.social-buttons {
-    display: flex;
-    gap: 1rem;
-}
-
-.social-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1rem;
-    background: var(--bg-glass-strong);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.social-btn:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-}
-
-.social-btn.google:hover {
-    border-color: #4285F4;
-    background: rgba(66, 133, 244, 0.1);
-}
-
-.social-btn.github:hover {
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="light"] .social-btn {
-    background: rgba(241, 245, 249, 0.8);
-}
-
-[data-theme="light"] .social-btn.github {
-    color: #1e293b;
-}
-
-[data-theme="light"] .social-btn.github:hover {
-    border-color: #1e293b;
-    background: rgba(30, 41, 59, 0.1);
 }
